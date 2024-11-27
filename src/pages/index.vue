@@ -12,72 +12,121 @@
       max-width="448"
       rounded="lg"
     >
-      <div class="text-subtitle-1 text-medium-emphasis">Account</div>
+      <v-form v-model="form" @submit.prevent="onSubmit">
+        <v-text-field
+          v-model="username"
+          :rules="[required]"
+          prepend-inner-icon="mdi-account-key"
+          variant="outlined"
+          label="Username"
+        ></v-text-field>
 
-      <v-text-field
-        density="compact"
-        placeholder="Email address"
-        prepend-inner-icon="mdi-email-outline"
-        variant="outlined"
-      ></v-text-field>
+        <v-text-field
+          v-model="password"
+          :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
+          :type="visible ? 'text' : 'password'"
+          :rules="[required]"
+          label="Password"
+          prepend-inner-icon="mdi-lock"
+          variant="outlined"
+          @click:append-inner="toggleVisibility"
+        ></v-text-field>
 
-      <div class="text-subtitle-1 text-medium-emphasis d-flex align-center justify-space-between">
-        Password
-
-        <a
-          class="text-caption text-decoration-none text-blue"
-          href="#"
-          rel="noopener noreferrer"
-          target="_blank"
+        <v-btn
+          class="mb-8"
+          :loading="loading"
+          color="blue"
+          size="large"
+          variant="tonal"
+          block
+          type="submit"
         >
-          Forgot login password?</a>
-      </div>
-
-      <v-text-field
-        :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
-        :type="visible ? 'text' : 'password'"
-        density="compact"
-        placeholder="Enter your password"
-        prepend-inner-icon="mdi-lock-outline"
-        variant="outlined"
-        @click:append-inner="toggleVisibility"
-      ></v-text-field>
-
-      <v-btn
-        class="mb-8"
-        color="blue"
-        size="large"
-        variant="tonal"
-        block
-      >
-        Log In
-      </v-btn>
-
-      <v-card-text class="text-center">
-        <a
-          class="text-blue text-decoration-none"
-          href="#"
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          Sign up now <v-icon icon="mdi-chevron-right"></v-icon>
-        </a>
-      </v-card-text>
+          Log In
+        </v-btn>
+      </v-form>
     </v-card>
   </div>
+
+<!-- SnackBar -->
+    <v-snackbar
+      v-model="snackbar"
+      :color="snackbarColor"
+      :timeout="timeout"
+      location="bottom right"
+    >
+      {{ text }}
+
+      <template v-slot:actions>
+        <v-btn
+          color="white"
+          variant="text"
+          @click="snackbar = false"
+        >
+          X
+        </v-btn>
+      </template>
+    </v-snackbar>
+  
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   data() {
     return {
-      visible: false // Declare visible variable
+      form: true, // Form validation state
+      username: null,
+      password: null,
+      loading: false,
+      visible: false, // Password visibility toggle
+      snackbar: false,
+      text: 'My timeout is set to 2000.',
+      timeout: 2000,
+      snackbarColor: 'green',
     };
   },
   methods: {
     toggleVisibility() {
-      this.visible = !this.visible; // Toggle the visibility state
-    }
-  }
+      this.visible = !this.visible; // Toggle password visibility
+    },
+    async onSubmit() {
+      if (!this.form) return; // Ensure form is valid
+
+      this.loading = true;
+
+      try {
+        const response = await axios.post(
+          `${import.meta.env.VITE_SUGAR_MONITORING_ENDPOINT}login`,
+          {
+            username: this.username,
+            password: this.password,
+          }
+        );
+
+        // Handle successful login
+        this.snackbar = true;
+        this.snackbarColor = 'green';
+        this.text = response?.data?.data?.message;
+          
+        localStorage.setItem("user", JSON.stringify(response?.data?.data));
+        localStorage.setItem("token", response?.data?.token);
+
+        this.$router.push('/dashboard');
+
+      } catch (error) {
+        console.log(error)
+        this.snackbar = true;
+        this.snackbarColor = 'red';
+        this.text = error?.response?.data?.errors?.[0]?.title
+
+      } finally {
+        this.loading = false;
+      }
+    },
+    required(value) {
+      return !!value || "Field is required"; // Basic required rule
+    },
+  },
 };
 </script>
