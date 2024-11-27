@@ -1,72 +1,35 @@
 <template>
     <v-card>
       <v-layout>
-        <v-app-bar
-          color="primary"
-          prominent
-        >
-          <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-  
-          <v-toolbar-title>My files</v-toolbar-title>
-  
-          <v-spacer></v-spacer>
-  
-          <template v-if="$vuetify.display.mdAndUp">
-            <v-btn icon="mdi-magnify" variant="text"></v-btn>
-  
-            <v-btn icon="mdi-filter" variant="text"></v-btn>
-          </template>
-  
-          <v-btn icon="mdi-dots-vertical" variant="text"></v-btn>
-        </v-app-bar>
-  
         <v-navigation-drawer
-          v-model="drawer"
-          :location="$vuetify.display.mobile ? 'bottom' : undefined"
-          temporary
+          expand-on-hover
+          rail
         >
-          <v-list
-            :items="items"
-          ></v-list>
+          <v-list>
+            <v-list-item
+              prepend-avatar="https://randomuser.me/api/portraits/women/85.jpg"
+              subtitle="sandra_a88@gmailcom"
+              title="Sandra Adams"
+            ></v-list-item>
+          </v-list>
+  
+          <v-divider></v-divider>
+  
+          <v-list density="compact" nav>
+            <v-list-item prepend-icon="mdi-account-group" title="Users" value="users"></v-list-item>
+            <v-list-item prepend-icon="mdi-monitor-edit" title="Daily Monitoring" value="shared"></v-list-item>
+            <v-list-item prepend-icon="mdi-star" title="Starred" value="starred"></v-list-item>
+          </v-list>
+          <template v-slot:append>
+            <div class="pa-2 pr-22">
+              <v-btn block>
+                <v-icon size="large">mdi-logout</v-icon>
+              </v-btn>
+            </div>
+          </template>          
         </v-navigation-drawer>
   
-        <v-main style="height: 708px;">
-          <v-card-text>
-            The navigation drawer will appear from the bottom on smaller size screens.
-          </v-card-text>
-        </v-main>
+        <v-main style="height: 710px"></v-main>
       </v-layout>
     </v-card>
   </template>
-  <script>
-    export default {
-      data: () => ({
-        drawer: false,
-        group: null,
-        items: [
-          {
-            title: 'Foo',
-            value: 'foo',
-          },
-          {
-            title: 'Bar',
-            value: 'bar',
-          },
-          {
-            title: 'Fizz',
-            value: 'fizz',
-          },
-          {
-            title: 'Buzz',
-            value: 'buzz',
-          },
-        ],
-      }),
-  
-      watch: {
-        group () {
-          this.drawer = false
-        },
-      },
-    }
-  </script>
